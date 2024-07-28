@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "911852002991",
+    "firebase_url": "https://nyumba-kumi-kumiguard-default-rtdb.firebaseio.com",
+    "project_id": "nyumba-kumi-kumiguard",
+    "storage_bucket": "nyumba-kumi-kumiguard.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911852002991:android:66f3c04ec4212f41647e5a",
+        "android_client_info": {
+          "package_name": "com.example.kumiguard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911852002991-qhvnsef96ghh1f0lcnde7nv4jkuf2c6g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEFnXOKAd8aiwa_b0RopL8_rPADaMeuGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "911852002991-qhvnsef96ghh1f0lcnde7nv4jkuf2c6g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911852002991:android:d4eb0408c0d8f9ac647e5a",
+        "android_client_info": {
+          "package_name": "com.example.projo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911852002991-qhvnsef96ghh1f0lcnde7nv4jkuf2c6g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEFnXOKAd8aiwa_b0RopL8_rPADaMeuGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "911852002991-qhvnsef96ghh1f0lcnde7nv4jkuf2c6g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
