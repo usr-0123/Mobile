@@ -1,137 +1,188 @@
 package com.example.projo.forms;
 
-import android.content.ContentResolver;
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.projo.R;
-import com.example.projo.models.PostModel;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 // CreatePostActivity.java
-public class CreatePostActivity extends AppCompatActivity {
+public class CreatePostActivity extends Activity {
 
-    private EditText titleEditText, contentEditText;
-    private Button mediaButton, submitButton;
-    private Uri mediaUri;
-    private String mediaUrl;
+    private static final int REQUEST_CODE_ATTACH_FILE = 1;
+
+    private EditText editTextPostMessage;
+
+    private EditText locationEditText;
+
+    private EditText editTextPostTitle;
+
+    private DatabaseReference databaseReference;
+
+    private List<Uri> attachmentUris = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
-        titleEditText = findViewById(R.id.titleEditText);
-        contentEditText = findViewById(R.id.contentEditText);
-        mediaButton = findViewById(R.id.mediaButton);
-        submitButton = findViewById(R.id.submitButton);
+        databaseReference = FirebaseDatabase.getInstance().getReference("reports");
 
-        mediaButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectMedia();
-            }
-        });
+        editTextPostMessage = findViewById(R.id.contentEditText);
+        editTextPostTitle = findViewById(R.id.titleEditText);
+        locationEditText = findViewById(R.id.locationEditText);
+        Button buttonAttachFile = findViewById(R.id.mediaButton);
+        Button buttonCreatePost = findViewById(R.id.submitButton);
 
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submitPost();
-            }
-        });
+        buttonAttachFile.setOnClickListener(v -> attachFile());
+        buttonCreatePost.setOnClickListener(v -> createPost());
     }
 
-    private void selectMedia() {
+    private void attachFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        startActivityForResult(intent, 1);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        startActivityForResult(intent, REQUEST_CODE_ATTACH_FILE);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
-            mediaUri = data.getData();
-        }
-    }
-
-    private void submitPost() {
-        String title = titleEditText.getText().toString().trim();
-        String content = contentEditText.getText().toString().trim();
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-        if (mediaUri != null) {
-            uploadMediaAndSavePost(title, content, userId, date);
-        } else {
-            savePostToDatabase(title, content, userId, date, null);
-        }
-    }
-
-    private void uploadMediaAndSavePost(String title, String content, String userId, String date) {
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference("posts").child(System.currentTimeMillis() + "." + getFileExtension(mediaUri));
-        storageReference.putFile(mediaUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                    @Override
-                    public void onSuccess(Uri uri) {
-                        mediaUrl = uri.toString();
-                        savePostToDatabase(title, content, userId, date, mediaUrl);
-                    }
-                });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // Handle error
-            }
-        });
-    }
-
-    private void savePostToDatabase(String title, String content, String userId, String date, String mediaUrl) {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("posts");
-        String postId = databaseReference.push().getKey();
-        PostModel post = new PostModel(postId, userId, title, content, mediaUrl, date);
-        databaseReference.child(postId).setValue(post).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(CreatePostActivity.this, "Post created successfully", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    // Handle error
+        if (requestCode == REQUEST_CODE_ATTACH_FILE && resultCode == RESULT_OK) {
+            if (data.getClipData() != null) {
+                // Handle multiple files
+                int count = data.getClipData().getItemCount();
+                for (int i = 0; i < count; i++) {
+                    Uri fileUri = data.getClipData().getItemAt(i).getUri();
+                    attachmentUris.add(fileUri);
                 }
+                Toast.makeText(this, "Multiple attachments selected", Toast.LENGTH_SHORT).show();
+            } else if (data.getData() != null) {
+                // Handle single file
+                Uri attachmentUri = data.getData();
+                attachmentUris.add(attachmentUri);
+                Toast.makeText(this, "Single attachment selected", Toast.LENGTH_SHORT).show();
+                previewFile(attachmentUri);
             }
-        });
+        }
+    }
+
+    private void previewFile(Uri fileUri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(fileUri, getContentResolver().getType(fileUri));
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(intent, "Preview File"));
+    }
+
+    private void createPost() {
+        String postMessage = editTextPostMessage.getText().toString().trim();
+        String locationDetails = locationEditText.getText().toString().trim();
+        String reportTitle = editTextPostTitle.getText().toString().trim();
+
+        if (postMessage.isEmpty()) {
+            Toast.makeText(this, "Please enter a post message", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (locationDetails.isEmpty()) {
+            Toast.makeText(this, "Please enter location details", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseReference newPostRef = databaseReference.push();
+        newPostRef.child("location").setValue(locationDetails);
+        newPostRef.child("message").setValue(postMessage);
+        newPostRef.child("userEmail").setValue("user@example.com");
+        newPostRef.child("reportTitle").setValue(reportTitle);
+        newPostRef.child("datetime").setValue(System.currentTimeMillis());
+
+        if (!attachmentUris.isEmpty()) {
+            uploadAttachments(attachmentUris, newPostRef);
+        } else {
+            savePost(newPostRef);
+        }
+    }
+
+    private void uploadAttachments(List<Uri> attachmentUris, final DatabaseReference newPostRef) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        for (Uri attachmentUri : attachmentUris) {
+            // Get file extension and folder name
+            String fileExtension = getFileExtension(attachmentUri);
+            String folderName = getFolderName(fileExtension);
+
+            // Create a reference for each file
+            StorageReference fileRef = storageRef.child(folderName).child(Objects.requireNonNull(attachmentUri.getLastPathSegment()));
+
+            fileRef.putFile(attachmentUri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        // Get download URL
+                        fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                            // Save URL to Firebase
+                            newPostRef.child("attachmentURLs").push().setValue(uri.toString());
+                            // Check if all files have been uploaded
+                            if (attachmentUris.indexOf(attachmentUri) == attachmentUris.size() - 1) {
+                                savePost(newPostRef);
+                                showToast();
+                            }
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(CreatePostActivity.this, "Failed to upload attachment", Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private void showToast() {
+        Toast.makeText(this, "Attachments uploaded successfully", Toast.LENGTH_SHORT).show();
     }
 
     private String getFileExtension(Uri uri) {
-        ContentResolver contentResolver = getContentResolver();
-        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
+        return Objects.requireNonNull(getContentResolver().getType(uri)).split("/")[1];
+    }
+
+    private String getFolderName(String fileExtension) {
+        switch (fileExtension.toLowerCase()) {
+            case "jpg":
+            case "jpeg":
+            case "png":
+                return "images";
+            case "mp4":
+            case "avi":
+            case "mov":
+                return "videos";
+            case "pdf":
+            case "doc":
+            case "docx":
+                return "documents";
+            case "mp3": // Mpeg audio layer III
+            case "wav": // waveform audio file format
+            case "flac" : // Free lossless audio code
+            case "aac": // Advanced audio coding
+            case "alac": // Apple lossless audio codec
+            case "ogg": // ogg vorbis
+            case "aiff": // audio interchange file format
+                return "music";
+            default:
+                return "others";
+        }
+    }
+
+    private void savePost(DatabaseReference newPostRef) {
+        Toast.makeText(this, "Post created successfully", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

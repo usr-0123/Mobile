@@ -25,4 +25,5 @@
     <string name="content">Enter the content</string>
     <string name="select_media">Select Media</string>
     <string name="submit_post">Post</string>
+    <string name="enter_location_details">Enter location details</string>
 </resources>
