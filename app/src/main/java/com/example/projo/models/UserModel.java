@@ -1,21 +1,31 @@
 package com.example.projo.models;
 
 public class UserModel {
-    private String id;
-    private String name;
+    private String userId;
+    private String email;
 
-    public UserModel() { } // Empty constructor needed for Firestore
+    public UserModel() {
+        // Default constructor required for calls to DataSnapshot.getValue(UserModel.class)
+    }
 
-    public UserModel(String id, String name) {
-        this.id = id;
-        this.name = name;
+    public UserModel(String userId, String email) {
+        this.userId = userId;
+        this.email = email;
     }
 
     public String getId() {
-        return id;
+        return userId;
     }
 
-    public String getName() {
-        return name;
+    public void setId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -26,4 +26,13 @@
     <string name="select_media">Select Media</string>
     <string name="submit_post">Post</string>
     <string name="enter_location_details">Enter location details</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="datetime">Datetime</string>
+    <string name="location">Location</string>
+    <string name="report_title">Report Title</string>
+    <string name="user_email">User Email</string>
+    <string name="image_view">Image view</string>
 </resources>

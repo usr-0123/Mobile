@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.projo.R;
 import com.example.projo.adapters.PostAdapter;
+import com.example.projo.adapters.ReportsAdapter;
 import com.example.projo.models.PostModel;
+import com.example.projo.models.ReportModel;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,9 +25,8 @@ import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private List<PostModel> postList;
-    private DatabaseReference databaseReference;
+    private List<ReportModel> postList;
+    private ReportsAdapter reportsAdapter;
 
     @Nullable
     @Override
@@ -34,30 +35,34 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize RecyclerView
-        recyclerView = view.findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_container);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Initialize post list and adapter
         postList = new ArrayList<>();
-        PostAdapter postAdapter = new PostAdapter(postList);
-        recyclerView.setAdapter(postAdapter);
+        reportsAdapter = new ReportsAdapter(postList);
+        recyclerView.setAdapter(reportsAdapter);
 
         // Setup Firebase database reference
-        databaseReference = FirebaseDatabase.getInstance().getReference("posts");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("reports");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 postList.clear();
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    PostModel post = postSnapshot.getValue(PostModel.class);
-                    postList.add(post);
+                    ReportModel post = postSnapshot.getValue(ReportModel.class);
+                    if (post != null) {
+                        postList.add(post);
+                    }
                 }
-                postAdapter.notifyDataSetChanged();
+                reportsAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle database error
+                // Log the error or show a message to the user
+                // Log.e("HomeFragment", "Database error: " + error.getMessage());
+                // Optionally, you can show a Toast message to inform the user
             }
         });
 

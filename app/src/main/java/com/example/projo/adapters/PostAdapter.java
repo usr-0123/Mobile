@@ -14,7 +14,7 @@ import com.example.projo.models.PostModel;
 import java.util.List;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
-    private List<PostModel> postList;
+    private final List<PostModel> postList;
 
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         public TextView title;

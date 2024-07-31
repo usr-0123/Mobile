@@ -13,7 +13,6 @@ import com.example.projo.models.UserModel;
 
 import java.util.List;
 
-// UsersAdapter.java
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
     private List<UserModel> userList;
     private OnItemClickListener listener;
@@ -37,7 +36,13 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         UserModel user = userList.get(position);
-        holder.bind(user, listener);
+        holder.emailTextView.setText(user.getEmail());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onItemClick(user);
+            }
+        });
     }
 
     @Override
@@ -46,21 +51,11 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHold
     }
 
     public static class UserViewHolder extends RecyclerView.ViewHolder {
-        TextView userName;
+        public TextView emailTextView;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            userName = itemView.findViewById(R.id.user_name);
-        }
-
-        public void bind(final UserModel user, final OnItemClickListener listener) {
-            userName.setText(user.getName());
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClick(user);
-                }
-            });
+            emailTextView = itemView.findViewById(R.id.user_email);
         }
     }
 }
