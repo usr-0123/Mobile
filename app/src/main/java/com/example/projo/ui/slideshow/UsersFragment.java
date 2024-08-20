@@ -73,7 +73,7 @@ public class UsersFragment extends Fragment {
                         }
 
                         if (chatRoomExists) {
-                            openChatRoom(chatRoomId);
+                            openChatRoom(chatRoomId, user);
                         } else {
                             createChatRoom(user);
                         }
@@ -100,7 +100,7 @@ public class UsersFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    openChatRoom(chatRoomId);
+                    openChatRoom(chatRoomId, user);
                 } else {
                     // Handle the error
                 }
@@ -108,9 +108,11 @@ public class UsersFragment extends Fragment {
         });
     }
 
-    private void openChatRoom(String chatRoomId) {
+    private void openChatRoom(String chatRoomId, UserModel user) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra("chatRoomId", chatRoomId);
+        intent.putExtra("userId", user.getId());
+        intent.putExtra("email", user.getEmail());
         startActivity(intent);
     }
 
