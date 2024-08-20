@@ -22,7 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private EditText emailEditText, passwordEditText;
+    private EditText firstNameEditText, lastnameEditText, emailEditText, passwordEditText;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
 
@@ -31,6 +31,8 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        firstNameEditText = findViewById(R.id.firstNameEditText);
+        lastnameEditText = findViewById(R.id.lastNameEditText);
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         Button registerButton = findViewById(R.id.registerButton);
@@ -47,8 +49,20 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
+        String firstName = firstNameEditText.getText().toString().trim();
+        String lastName = lastnameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
+
+        if (TextUtils.isEmpty(firstName)) {
+            firstNameEditText.setError("First name is required");
+            return;
+        }
+
+        if (TextUtils.isEmpty(lastName)) {
+            lastnameEditText.setError("Last name is required");
+            return;
+        }
 
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("Email is required");
@@ -65,13 +79,13 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
+        mAuth.createUserWithEmailAndPassword( email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             String userId = mAuth.getCurrentUser().getUid();
-                            User user = new User(email, userId);
+                            User user = new User(firstName, lastName, email, userId);
                             mDatabase.child("users").child(userId).setValue(user)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
