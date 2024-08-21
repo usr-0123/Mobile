@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,16 +27,16 @@ import java.util.List;
 
 public class ChatListFragment extends Fragment {
 
-    private RecyclerView recyclerView;
     private ChatsAdapter chatAdapter;
     private List<ChatsModel> chatList;
     private DatabaseReference chatDatabase;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull  LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
 
-        recyclerView = view.findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         chatList = new ArrayList<>();
         chatAdapter = new ChatsAdapter(chatList, chat -> {
@@ -47,7 +48,7 @@ public class ChatListFragment extends Fragment {
         });
         recyclerView.setAdapter(chatAdapter);
 
-        chatDatabase = FirebaseDatabase.getInstance().getReference("chats");
+        DatabaseReference chatRoomRef = FirebaseDatabase.getInstance().getReference("chats");
         fetchChats();
 
         return view;

@@ -3,21 +3,38 @@ package com.example.projo.models;
 public class UserModel {
     private String userId;
     private String email;
+    private String recipientId;
+    private String recipientEmail;
 
+    // Default constructor
     public UserModel() {
         // Default constructor required for calls to DataSnapshot.getValue(UserModel.class)
     }
 
+    // Constructor for current user only
     public UserModel(String userId, String email) {
         this.userId = userId;
         this.email = email;
+    }
+
+    // Constructor for both current user and recipient
+    public UserModel(String userId, String email, String recipientId, String recipientEmail) {
+        this.userId = userId;
+        this.email = email;
+        this.recipientId = recipientId;
+        this.recipientEmail = recipientEmail;
+    }
+
+    // Getter and setter methods for current user
+    public String getUserId() {
+        return userId;
     }
 
     public String getId() {
         return userId;
     }
 
-    public void setId(String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -27,5 +44,22 @@ public class UserModel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // Getter and setter methods for recipient user
+    public String getRecipientId() {
+        return recipientId;
+    }
+
+    public void setRecipientId(String recipientId) {
+        this.recipientId = recipientId;
+    }
+
+    public String getRecipientEmail() {
+        return recipientEmail;
+    }
+
+    public void setRecipientEmail(String recipientEmail) {
+        this.recipientEmail = recipientEmail;
     }
 }

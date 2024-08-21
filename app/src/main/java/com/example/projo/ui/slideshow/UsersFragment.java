@@ -45,7 +45,7 @@ public class UsersFragment extends Fragment {
         adapter = new UsersAdapter(userList, new UsersAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(UserModel user) {
-                checkChatRoomExists(user);
+                openOrCreateChatRoom(user);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -53,54 +53,51 @@ public class UsersFragment extends Fragment {
         return view;
     }
 
-    private void checkChatRoomExists(final UserModel user) {
+    private void openOrCreateChatRoom(final UserModel user) {
         String currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        String chatRoomId = user.getUserId();  // Using recipientId as chatRoomId
+
         DatabaseReference chatRoomsRef = FirebaseDatabase.getInstance().getReference("chats");
 
-        chatRoomsRef.orderByChild("participants/" + currentUserId).equalTo(true)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        boolean chatRoomExists = false;
-                        String chatRoomId = null;
+        // Check if the chat room with the recipient ID already exists
+        chatRoomsRef.child(chatRoomId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    // Chat room does not exist, create a new one
+                    createChatRoom(user, chatRoomId);
+                } else {
+                    // Chat room exists, open it
+                    openChatRoom(chatRoomId, user);
+                }
+            }
 
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            if (snapshot.child("participants").child(user.getId()).exists()) {
-                                chatRoomExists = true;
-                                chatRoomId = snapshot.getKey();
-                                break;
-                            }
-                        }
-
-                        if (chatRoomExists) {
-                            openChatRoom(chatRoomId, user);
-                        } else {
-                            createChatRoom(user);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        // Handle possible errors
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors
+            }
+        });
     }
 
-    private void createChatRoom(UserModel user) {
+    private void createChatRoom(UserModel recipientUser, String chatRoomId) {
         String currentUserId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        String currentUserEmail = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getEmail();
+
         DatabaseReference chatRoomsRef = FirebaseDatabase.getInstance().getReference("chats");
 
-        String chatRoomId = chatRoomsRef.push().getKey();
+        // Create the chat room details
         Map<String, Object> chatRoom = new HashMap<>();
-        chatRoom.put("participants_" + currentUserId, true);
-        chatRoom.put("participants_" + user.getId(), true);
+        chatRoom.put("senderId", currentUserId);
+        chatRoom.put("senderEmail", currentUserEmail);
+        chatRoom.put("recipientId", recipientUser.getUserId());
+        chatRoom.put("recipientEmail", recipientUser.getEmail());
+        chatRoom.put("createdAt", System.currentTimeMillis());
 
-        assert chatRoomId != null;
         chatRoomsRef.child(chatRoomId).setValue(chatRoom).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    openChatRoom(chatRoomId, user);
+                    openChatRoom(chatRoomId, recipientUser);
                 } else {
                     // Handle the error
                 }
@@ -111,7 +108,7 @@ public class UsersFragment extends Fragment {
     private void openChatRoom(String chatRoomId, UserModel user) {
         Intent intent = new Intent(getActivity(), ChatActivity.class);
         intent.putExtra("chatRoomId", chatRoomId);
-        intent.putExtra("userId", user.getId());
+        intent.putExtra("userId", user.getUserId());
         intent.putExtra("email", user.getEmail());
         startActivity(intent);
     }
