@@ -5,6 +5,8 @@ public class UserModel {
     private String email;
     private String recipientId;
     private String recipientEmail;
+    private String firstName;  // New field
+    private String lastName;   // New field
 
     // Default constructor
     public UserModel() {
@@ -18,11 +20,13 @@ public class UserModel {
     }
 
     // Constructor for both current user and recipient
-    public UserModel(String userId, String email, String recipientId, String recipientEmail) {
+    public UserModel(String firstName, String lastName, String userId, String email, String recipientId, String recipientEmail) {
         this.userId = userId;
         this.email = email;
         this.recipientId = recipientId;
         this.recipientEmail = recipientEmail;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     // Getter and setter methods for current user
@@ -61,5 +65,23 @@ public class UserModel {
 
     public void setRecipientEmail(String recipientEmail) {
         this.recipientEmail = recipientEmail;
+    }
+
+    // Getter and setter methods for first name
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    // Getter and setter methods for last name
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

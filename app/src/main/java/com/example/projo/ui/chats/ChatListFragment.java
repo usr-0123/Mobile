@@ -16,6 +16,7 @@ import com.example.projo.R;
 import com.example.projo.adapters.ChatsAdapter;
 import com.example.projo.models.ChatsModel;
 import com.example.projo.pages.ChatActivity;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,35 +34,42 @@ public class ChatListFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull  LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         chatList = new ArrayList<>();
         chatAdapter = new ChatsAdapter(chatList, chat -> {
             // Handle chat click
             Intent intent = new Intent(getActivity(), ChatActivity.class);
-            intent.putExtra("chatId", chat.getId());
-            intent.putExtra("chatName", chat.getName());
+            intent.putExtra("chatRoomId", chat.getRecipientId());
+            intent.putExtra("recipientEmail", chat.getRecipientEmail());
             startActivity(intent);
         });
         recyclerView.setAdapter(chatAdapter);
 
-        DatabaseReference chatRoomRef = FirebaseDatabase.getInstance().getReference("chats");
+        // Initialize chatDatabase reference to "chats" node
+        chatDatabase = FirebaseDatabase.getInstance().getReference("chats");
+
         fetchChats();
 
         return view;
     }
 
     private void fetchChats() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         chatDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 chatList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     ChatsModel chat = snapshot.getValue(ChatsModel.class);
-                    chatList.add(chat);
+                    if (chat != null && (chat.getSenderId().equals(currentUserId) || chat.getRecipientId().equals(currentUserId))) {
+                        chatList.add(chat);
+                    }
                 }
                 chatAdapter.notifyDataSetChanged();
             }

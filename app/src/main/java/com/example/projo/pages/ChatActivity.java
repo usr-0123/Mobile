@@ -7,17 +7,23 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.projo.R;
 import com.example.projo.adapters.ChatAdapter;
+import com.example.projo.models.UserModel;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 public class ChatActivity extends AppCompatActivity {
 
-    private String userId;
-    private String userName;
+    private String chatRoomId;
     private TextView chatTitle;
 
     private ListView chatListView;
@@ -31,12 +37,10 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Get the user data from the intent
-        userId = getIntent().getStringExtra("userId");
-        userName = getIntent().getStringExtra("email");
+        // Get the chat room ID from the intent
+        chatRoomId = getIntent().getStringExtra("chatRoomId");
 
         chatTitle = findViewById(R.id.chatTitle);
-        chatTitle.setText("Chat with " + userName);
 
         chatListView = findViewById(R.id.chat_list_view);
         inputMessage = findViewById(R.id.input_message);
@@ -45,6 +49,9 @@ public class ChatActivity extends AppCompatActivity {
         chatMessages = new ArrayList<>();
         chatAdapter = new ChatAdapter(this, chatMessages);
         chatListView.setAdapter(chatAdapter);
+
+        // Fetch recipient user details
+        fetchRecipientDetails(chatRoomId);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +62,26 @@ public class ChatActivity extends AppCompatActivity {
                     chatAdapter.notifyDataSetChanged();
                     inputMessage.setText("");
                 }
+            }
+        });
+    }
+
+    private void fetchRecipientDetails(String recipientUserId) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(recipientUserId);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserModel recipientUser = dataSnapshot.getValue(UserModel.class);
+                if (recipientUser != null) {
+                    // Set the chat title to the recipient's name
+                    chatTitle.setText(recipientUser.getFirstName() + " " + recipientUser.getLastName());  // or use recipientUser.getEmail()
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle any errors
             }
         });
     }
