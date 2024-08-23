@@ -4,28 +4,28 @@ import androidx.annotation.NonNull;
 
 public class GroupModel {
     private String id;
-    private String name;
+    private String title;
 
     public GroupModel() {
         // Default constructor required for calls to DataSnapshot.getValue(Group.class)
     }
 
-    public GroupModel(String id, String name) {
+    public GroupModel(String id, String title) {
         this.id = id;
-        this.name = name;
+        this.title = title;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return name;
+        return title;
     }
 }

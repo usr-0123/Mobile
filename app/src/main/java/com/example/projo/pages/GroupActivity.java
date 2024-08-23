@@ -1,12 +1,9 @@
 package com.example.projo.pages;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.projo.R;
 
@@ -15,12 +12,17 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_group);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        // Get the group id and title from the intent
+        String groupId = getIntent().getStringExtra("GROUP_ID");
+        String groupName = getIntent().getStringExtra("GROUP_NAME");
+
+        // Set the title in the ActionBar (if using)
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(groupName);
+        }
+
+        // Implement additional logic for displaying the chatroom content here
     }
 }

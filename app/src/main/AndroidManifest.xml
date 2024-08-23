@@ -11,7 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Projo">
-
+        <activity
+            android:name=".forms.CreateGroupActivity"
+            android:exported="false" />
         <activity
             android:name=".pages.SignUpActivity"
             android:exported="false" />
@@ -28,7 +30,6 @@
         <activity
             android:name=".pages.ChatActivity"
             android:exported="false"
-            android:label="@string/title_activity_chat"
             android:theme="@style/Theme.Projo" />
         <activity
             android:name=".pages.SignInActivity"
@@ -40,7 +41,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

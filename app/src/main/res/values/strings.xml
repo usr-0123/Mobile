@@ -37,4 +37,7 @@
     <string name="image_view">Image view</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
+    <string name="add_new_group">Add New Group</string>
+    <string name="create_group_form">New group form</string>
+    <string name="group_title">Group Title</string>
 </resources>

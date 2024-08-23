@@ -73,9 +73,14 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 UserModel recipientUser = dataSnapshot.getValue(UserModel.class);
+                // Set the title in the ActionBar (if using)
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setTitle(recipientUser.getFirstName() + " " + recipientUser.getLastName());  // or use recipientUser.getEmail()
+                } else {
                 if (recipientUser != null) {
                     // Set the chat title to the recipient's name
                     chatTitle.setText(recipientUser.getFirstName() + " " + recipientUser.getLastName());  // or use recipientUser.getEmail()
+                }
                 }
             }
 

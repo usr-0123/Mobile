@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.projo.R;
+import com.example.projo.adapters.GroupAdapter;
+import com.example.projo.forms.CreateGroupActivity;
 import com.example.projo.models.GroupModel;
 import com.example.projo.pages.GroupActivity;
 import com.google.firebase.database.DataSnapshot;
@@ -29,7 +31,7 @@ public class GroupListFragment extends Fragment {
 
     private ListView listView;
     private List<GroupModel> groupList;
-    private ArrayAdapter<GroupModel> adapter;
+    private GroupAdapter adapter;
     private DatabaseReference databaseReference;
 
     @Nullable
@@ -38,8 +40,10 @@ public class GroupListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_group, container, false);
 
         listView = view.findViewById(R.id.fragment_group_listView);
+        Button addGroupButton = view.findViewById(R.id.btn_add_group);
+
         groupList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, groupList);
+        adapter = new GroupAdapter(getContext(), groupList);
         listView.setAdapter(adapter);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("groups");
@@ -50,7 +54,9 @@ public class GroupListFragment extends Fragment {
                 groupList.clear();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     GroupModel group = postSnapshot.getValue(GroupModel.class);
-                    groupList.add(group);
+                    if (group != null) {
+                        groupList.add(group);
+                    }
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -67,7 +73,16 @@ public class GroupListFragment extends Fragment {
                 GroupModel selectedGroup = groupList.get(position);
                 Intent intent = new Intent(getActivity(), GroupActivity.class);
                 intent.putExtra("GROUP_ID", selectedGroup.getId());
-                intent.putExtra("GROUP_NAME", selectedGroup.getName());
+                intent.putExtra("GROUP_NAME", selectedGroup.getTitle());
+                startActivity(intent);
+            }
+        });
+
+        // Handle Add Group Button click
+        addGroupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CreateGroupActivity.class);
                 startActivity(intent);
             }
         });
