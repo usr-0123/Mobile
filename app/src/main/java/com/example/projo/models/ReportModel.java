@@ -3,6 +3,7 @@ package com.example.projo.models;
 import java.util.List;
 
 public class ReportModel {
+    private String reportId;
     private long datetime;
     private String location;
     private String message;
@@ -16,7 +17,8 @@ public class ReportModel {
         // No-argument constructor required for Firebase
     }
 
-    public ReportModel(long datetime, String firstName, String lastName, String location, String message, String reportTitle, String userId, List<String> mediaUrls) {
+    public ReportModel(long datetime, String reportId, String firstName, String lastName, String location, String message, String reportTitle, String userId, List<String> mediaUrls) {
+        this.reportId = reportId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.datetime = datetime;
@@ -28,6 +30,10 @@ public class ReportModel {
     }
 
     // Getters and Setters
+    public String getReportId() {return reportId;};
+
+    public void setReportId(String reportId) {this.reportId = reportId;}
+
     public String getFirstName() {return firstName;}
 
     public void setFirstName(String firstName) {this.firstName = firstName;}

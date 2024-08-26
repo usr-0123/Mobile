@@ -41,4 +41,5 @@
     <string name="create_group_form">New group form</string>
     <string name="group_title">Group Title</string>
     <string name="sender_names">Sender Names</string>
+    <string name="report_id">Report Id</string>
 </resources>

@@ -24,10 +24,17 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportViewHolder> {
-    private List<ReportModel> postList;
 
-    public ReportsAdapter(List<ReportModel> postList) {
+    private final List<ReportModel> postList;
+    private final OnReportClickListener onReportClickListener;
+
+    public interface OnReportClickListener {
+        void onReportClick(ReportModel report);
+    }
+
+    public ReportsAdapter(List<ReportModel> postList, OnReportClickListener onReportClickListener) {
         this.postList = postList;
+        this.onReportClickListener = onReportClickListener;
     }
 
     @NonNull
@@ -73,7 +80,6 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle possible errors.
                 holder.senderNames.setText("Error fetching user");
             }
         });
@@ -93,6 +99,8 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
         } else {
             holder.imageView.setVisibility(View.GONE);
         }
+
+        holder.itemView.setOnClickListener(v -> onReportClickListener.onReportClick(post));
     }
 
     @Override
