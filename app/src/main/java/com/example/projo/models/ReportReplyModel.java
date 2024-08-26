@@ -7,6 +7,7 @@ public class ReportReplyModel {
     private String userId;
     private String message;
     private long timestamp;
+    private  UserModel user;
 
     // Default constructor required for calls to DataSnapshot.getValue(ReplyModel.class)
     public ReportReplyModel() {
@@ -21,6 +22,14 @@ public class ReportReplyModel {
     }
 
     // Getters and setters
+    public UserModel getUser() {
+        return user;
+    }
+
+    public void setUser(UserModel user) {
+        this.user = user;
+    }
+
     public String getReplyId() {
         return replyId;
     }

@@ -34,7 +34,15 @@ public class ReportRepliesAdapter extends RecyclerView.Adapter<ReportRepliesAdap
     public void onBindViewHolder(@NonNull ReportReplyViewHolder holder, int position) {
         ReportReplyModel reply = replyList.get(position);
         holder.replyMessage.setText(reply.getMessage());
-        holder.replyUser.setText(reply.getUserId()); // Replace with user name if available
+
+        // Set the user's full name (first and last name) instead of userId
+        if (reply.getUser() != null) {
+            String fullName = reply.getUser().getFirstName() + " " + reply.getUser().getLastName();
+            holder.replyUser.setText(fullName);
+        } else {
+            // Fallback in case user data is not available
+            holder.replyUser.setText("Unknown User");
+        }
 
         // Convert timestamp to formatted time
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());

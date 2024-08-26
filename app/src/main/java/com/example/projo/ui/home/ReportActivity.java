@@ -3,6 +3,7 @@ package com.example.projo.ui.home;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,6 +22,7 @@ import com.example.projo.R;
 import com.example.projo.adapters.ReportRepliesAdapter;
 import com.example.projo.models.ReportModel;
 import com.example.projo.models.ReportReplyModel;
+import com.example.projo.models.UserModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -102,9 +104,9 @@ public class ReportActivity extends AppCompatActivity {
                 ReportModel report = dataSnapshot.getValue(ReportModel.class);
                 if (report != null) {
                     // Set report details in UI
-                    reportTitle.setText(report.getReportTitle());
-                    reportLocation.setText(report.getLocation());
-                    reportMessage.setText(report.getMessage());
+                    reportTitle.setText("Title: " + report.getReportTitle());
+                    reportLocation.setText("Location: " + report.getLocation());
+                    reportMessage.setText("Message: " + report.getMessage());
 
                     // Convert timestamp to formatted date and time
                     long datetime = report.getDatetime();
@@ -123,6 +125,7 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle possible errors.
+                Log.e("FetchReportDetails", "Error fetching report details", databaseError.toException());
             }
         });
     }
@@ -152,10 +155,10 @@ public class ReportActivity extends AppCompatActivity {
                 for (DataSnapshot replySnapshot : dataSnapshot.getChildren()) {
                     ReportReplyModel reply = replySnapshot.getValue(ReportReplyModel.class);
                     if (reply != null) {
-                        replyList.add(reply);
+                        // Fetch user details using the userId from the reply
+                        fetchUserDetails(reply.getUserId(), reply);
                     }
                 }
-                repliesAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -164,6 +167,30 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void fetchUserDetails(String userId, ReportReplyModel reply) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserModel user = dataSnapshot.getValue(UserModel.class);
+                if (user != null) {
+                    // Attach the user information to the reply model
+                    reply.setUser(user); // Assuming you have a setUser(UserModel user) method in your ReportReplyModel
+
+                    // Add the reply with user details to the list
+                    replyList.add(reply);
+                    repliesAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+    }
+
 
     private void sendReply() {
         // Get userId from current user

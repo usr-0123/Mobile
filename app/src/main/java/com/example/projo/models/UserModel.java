@@ -5,8 +5,8 @@ public class UserModel {
     private String email;
     private String recipientId;
     private String recipientEmail;
-    private String firstName;  // New field
-    private String lastName;   // New field
+    private String firstName;
+    private String lastName;
 
     // Default constructor
     public UserModel() {
