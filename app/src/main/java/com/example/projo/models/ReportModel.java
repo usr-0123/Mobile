@@ -7,23 +7,35 @@ public class ReportModel {
     private String location;
     private String message;
     private String reportTitle;
-    private String userEmail;
+    private String userId;
+    private String firstName;
+    private String lastName;
     private List<String> attachmentURLs;
 
     public ReportModel() {
         // No-argument constructor required for Firebase
     }
 
-    public ReportModel(long datetime, String location, String message, String reportTitle, String userEmail, List<String> mediaUrls) {
+    public ReportModel(long datetime, String firstName, String lastName, String location, String message, String reportTitle, String userId, List<String> mediaUrls) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.datetime = datetime;
         this.location = location;
         this.message = message;
         this.reportTitle = reportTitle;
-        this.userEmail = userEmail;
+        this.userId = userId;
         this.attachmentURLs = attachmentURLs;
     }
 
     // Getters and Setters
+    public String getFirstName() {return firstName;}
+
+    public void setFirstName(String firstName) {this.firstName = firstName;}
+
+    public String getLastName() {return lastName;}
+
+    public void setLastName(String lastName) {this.firstName = lastName;}
+
     public long getDatetime() {
         return datetime;
     }
@@ -56,12 +68,12 @@ public class ReportModel {
         this.reportTitle = reportTitle;
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public List<String> getMediaUrls() {

@@ -9,6 +9,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.projo.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -18,18 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-// CreatePostActivity.java
 public class CreatePostActivity extends Activity {
 
     private static final int REQUEST_CODE_ATTACH_FILE = 1;
 
     private EditText editTextPostMessage;
-
     private EditText locationEditText;
-
     private EditText editTextPostTitle;
 
     private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     private List<Uri> attachmentUris = new ArrayList<>();
 
@@ -38,6 +39,11 @@ public class CreatePostActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
 
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+
+        // Initialize database reference
         databaseReference = FirebaseDatabase.getInstance().getReference("reports");
 
         editTextPostMessage = findViewById(R.id.contentEditText);
@@ -101,10 +107,13 @@ public class CreatePostActivity extends Activity {
             return;
         }
 
+        // Get userId from current user
+        String userId = (currentUser != null) ? currentUser.getUid() : "unknown_user";
+
         DatabaseReference newPostRef = databaseReference.push();
         newPostRef.child("location").setValue(locationDetails);
         newPostRef.child("message").setValue(postMessage);
-        newPostRef.child("userEmail").setValue("user@example.com");
+        newPostRef.child("userId").setValue(userId);
         newPostRef.child("reportTitle").setValue(reportTitle);
         newPostRef.child("datetime").setValue(System.currentTimeMillis());
 
@@ -168,13 +177,13 @@ public class CreatePostActivity extends Activity {
             case "doc":
             case "docx":
                 return "documents";
-            case "mp3": // Mpeg audio layer III
-            case "wav": // waveform audio file format
-            case "flac" : // Free lossless audio code
-            case "aac": // Advanced audio coding
-            case "alac": // Apple lossless audio codec
-            case "ogg": // ogg vorbis
-            case "aiff": // audio interchange file format
+            case "mp3":
+            case "wav":
+            case "flac":
+            case "aac":
+            case "alac":
+            case "ogg":
+            case "aiff":
                 return "music";
             default:
                 return "others";

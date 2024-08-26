@@ -1,5 +1,6 @@
 package com.example.projo.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.projo.R;
 import com.example.projo.models.ReportModel;
+import com.example.projo.models.UserModel;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportViewHolder> {
@@ -32,6 +37,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
         return new ReportViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         ReportModel post = postList.get(position);
@@ -44,24 +50,47 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
         String formattedDate = dateFormat.format(date);
 
         // Format Date to hh:mm
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         String formattedTime = sdf.format(date);
 
-        // Set the formatted time to the TextView
+        // Fetch user details from Firebase using userId
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(post.getUserId());
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    UserModel user = dataSnapshot.getValue(UserModel.class);
+                    if (user != null) {
+                        String recipientName = user.getFirstName() + " " + user.getLastName();
+                        holder.senderNames.setText(recipientName);
+                    } else {
+                        holder.senderNames.setText("Unknown User");
+                    }
+                } else {
+                    holder.senderNames.setText("Unknown User");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle possible errors.
+                holder.senderNames.setText("Error fetching user");
+            }
+        });
+
+        // Set other data
         holder.datetime.setText(formattedDate + " " + formattedTime);
         holder.location.setText(post.getLocation());
         holder.message.setText(post.getMessage());
         holder.reportTitle.setText(post.getReportTitle());
-        holder.userEmail.setText(post.getUserEmail());
 
         // Load media
         if (post.getMediaUrls() != null && !post.getMediaUrls().isEmpty()) {
             // Assuming only one image for simplicity
             Glide.with(holder.itemView.getContext())
                     .load(post.getMediaUrls().get(0)) // Load the first image
-                    .into(holder.imageView); // Use the correct imageView ID
+                    .into(holder.imageView);
         } else {
-            // Optionally, you can hide or clear the ImageView if no media is available
             holder.imageView.setVisibility(View.GONE);
         }
     }
@@ -72,8 +101,8 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView datetime, location, message, reportTitle, userEmail;
-        ImageView imageView; // Use the correct name
+        TextView datetime, location, message, reportTitle, senderNames;
+        ImageView imageView;
 
         public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,8 +110,8 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
             location = itemView.findViewById(R.id.location);
             message = itemView.findViewById(R.id.message);
             reportTitle = itemView.findViewById(R.id.reportTitle);
-            userEmail = itemView.findViewById(R.id.userEmail);
-            imageView = itemView.findViewById(R.id.imageView); // Corrected name
+            senderNames = itemView.findViewById(R.id.senderNames);
+            imageView = itemView.findViewById(R.id.imageView);
         }
     }
 }
