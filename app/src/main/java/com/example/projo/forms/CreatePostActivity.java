@@ -128,28 +128,36 @@ public class CreatePostActivity extends Activity {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
 
+        int totalAttachments = attachmentUris.size();
+        int[] completedUploads = {0}; // Counter for completed uploads
+
         for (Uri attachmentUri : attachmentUris) {
-            // Get file extension and folder name
             String fileExtension = getFileExtension(attachmentUri);
             String folderName = getFolderName(fileExtension);
 
-            // Create a reference for each file
-            StorageReference fileRef = storageRef.child(folderName).child(Objects.requireNonNull(attachmentUri.getLastPathSegment()));
+            // Use timestamp and original file name for unique file naming
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String fileName = "ReportFile" + timestamp + "_" + Objects.requireNonNull(attachmentUri.getLastPathSegment());
+            StorageReference fileRef = storageRef.child(folderName).child(fileName);
 
             fileRef.putFile(attachmentUri)
                     .addOnSuccessListener(taskSnapshot -> {
-                        // Get download URL
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                            // Save URL to Firebase
                             newPostRef.child("attachmentURLs").push().setValue(uri.toString());
+
                             // Check if all files have been uploaded
-                            if (attachmentUris.indexOf(attachmentUri) == attachmentUris.size() - 1) {
+                            completedUploads[0]++;
+                            if (completedUploads[0] == totalAttachments) {
                                 savePost(newPostRef);
                                 showToast();
                             }
+                        }).addOnFailureListener(e -> {
+                            // Log or handle the failure to get download URL
+                            Toast.makeText(CreatePostActivity.this, "Failed to get download URL", Toast.LENGTH_SHORT).show();
                         });
                     })
                     .addOnFailureListener(e -> {
+                        // Log or handle the failure to upload file
                         Toast.makeText(CreatePostActivity.this, "Failed to upload attachment", Toast.LENGTH_SHORT).show();
                     });
         }
