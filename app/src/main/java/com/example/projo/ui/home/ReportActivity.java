@@ -13,11 +13,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.projo.NotificationHelper;
 import com.example.projo.R;
 import com.example.projo.adapters.ReportRepliesAdapter;
 import com.example.projo.models.ReportModel;
@@ -25,6 +27,7 @@ import com.example.projo.models.ReportReplyModel;
 import com.example.projo.models.UserModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -82,6 +85,7 @@ public class ReportActivity extends AppCompatActivity {
         if (reportId != null) {
             fetchReportDetails(reportId);
             fetchReplies(reportId);
+            listenForNewReplies(reportId);
         }
 
         // Get the reference to the replies node under the specific report
@@ -191,6 +195,27 @@ public class ReportActivity extends AppCompatActivity {
         });
     }
 
+    private void listenForNewReplies(String reportId) {
+        DatabaseReference repliesRef = FirebaseDatabase.getInstance().getReference("reports").child(reportId).child("replies");
+        repliesRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                NotificationHelper.showNotification(ReportActivity.this, "Report reply", "A new reply has been added to the report.");
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {}
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
+        });
+    }
 
     private void sendReply() {
         // Get userId from current user
