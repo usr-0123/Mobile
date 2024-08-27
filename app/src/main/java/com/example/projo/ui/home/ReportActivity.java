@@ -119,10 +119,11 @@ public class ReportActivity extends AppCompatActivity {
 
                     // Handle attachments
                     if (report.getMediaUrls() != null && !report.getMediaUrls().isEmpty()) {
-                        for (String mediaUrl : report.getMediaUrls()) {
-                            addAttachmentToView(mediaUrl);
+                        for (String mediaUrls : report.getMediaUrls()) {
+                            addAttachmentToView(mediaUrls);
                         }
                     }
+//                    addAttachmentToView("https://firebasestorage.googleapis.com/v0/b/nyumba-kumi-kumiguard.appspot.com/o/images%2FReportFile1724672741482_image%3A1000135399?alt=media&token=906f60e4-d86e-418a-9ebc-182812326285");
                 }
             }
 
@@ -134,13 +135,19 @@ public class ReportActivity extends AppCompatActivity {
         });
     }
 
-    private void addAttachmentToView(String mediaUrl) {
+    private void addAttachmentToView(String mediaUrls) {
         ImageView attachmentView = new ImageView(this);
         attachmentView.setPadding(0, 8, 0, 8);
-        Glide.with(this).load(mediaUrl).placeholder(R.drawable.ic_menu_gallery).into(attachmentView);
+        // Set layout parameters to match parent width
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        attachmentView.setLayoutParams(layoutParams);
+        Glide.with(this).load(mediaUrls).placeholder(R.drawable.ic_menu_gallery).into(attachmentView);
         attachmentView.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.parse(mediaUrl), "image/*"); // Adjust MIME type as necessary
+            intent.setDataAndType(Uri.parse(mediaUrls), "image/*"); // Adjust MIME type as necessary
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         });
@@ -184,6 +191,9 @@ public class ReportActivity extends AppCompatActivity {
 
                     // Add the reply with user details to the list
                     replyList.add(reply);
+
+                    replyList.sort((r1, r2) -> Long.compare(r2.getTimestamp(), r1.getTimestamp()));
+
                     repliesAdapter.notifyDataSetChanged();
                 }
             }
@@ -200,7 +210,12 @@ public class ReportActivity extends AppCompatActivity {
         repliesRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                NotificationHelper.showNotification(ReportActivity.this, "Report reply", "A new reply has been added to the report.");
+
+                ReportReplyModel reply = dataSnapshot.getValue(ReportReplyModel.class);
+                if (reply != null) {
+                    String replyMessage = reply.getMessage();
+                    NotificationHelper.showNotification(ReportActivity.this, "Report reply", "Reply: " + replyMessage);
+                }
             }
 
             @Override

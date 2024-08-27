@@ -1,11 +1,14 @@
 package com.example.projo.adapters;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.example.projo.R;
 import com.example.projo.models.ReportModel;
 import com.example.projo.models.UserModel;
+import com.example.projo.ui.home.ReportActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -93,9 +97,7 @@ public class ReportsAdapter extends RecyclerView.Adapter<ReportsAdapter.ReportVi
         // Load media
         if (post.getMediaUrls() != null && !post.getMediaUrls().isEmpty()) {
             // Assuming only one image for simplicity
-            Glide.with(holder.itemView.getContext())
-                    .load(post.getMediaUrls().get(0)) // Load the first image
-                    .into(holder.imageView);
+            Glide.with(holder.itemView.getContext()).load(post.getMediaUrls().get(0)).into(holder.imageView);
         } else {
             holder.imageView.setVisibility(View.GONE);
         }

@@ -7,6 +7,8 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 
 import com.example.projo.NotificationHelper;
+import com.example.projo.models.ReportModel;
+import com.example.projo.models.ReportReplyModel;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,7 +30,11 @@ public class ReportViewModel extends ViewModel {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 // New report added
-                NotificationHelper.showNotification(context, "New Report", "A new report has been added.");
+                ReportModel report = dataSnapshot.getValue(ReportModel.class);
+                if (report != null) {
+                    String reportMessage = report.getMessage();
+                    NotificationHelper.showNotification(context, "New Report", "Report: " + reportMessage);
+                }
 
                 // Add listener for replies on this new report
                 String reportId = dataSnapshot.getKey();
@@ -55,7 +61,11 @@ public class ReportViewModel extends ViewModel {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 // New reply added
-                NotificationHelper.showNotification(context, "New Reply", "A new reply has been added to a report.");
+                ReportReplyModel reply = dataSnapshot.getValue(ReportReplyModel.class);
+                if (reply != null) {
+                    String replyMessage = reply.getMessage();
+                    NotificationHelper.showNotification(context, "New Reply", "Reply: " + replyMessage);
+                }
             }
 
             @Override

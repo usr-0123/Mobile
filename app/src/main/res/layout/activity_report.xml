@@ -50,8 +50,9 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_below="@id/reportMessage"
-        android:layout_marginTop="8dp"/>
+        android:layout_below="@id/reportMessage">
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/reportReplyRecyclerView"
